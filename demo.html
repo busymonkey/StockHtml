@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<html>
+<meta http-equiv="Access-Control-Allow-Origin" content="*"/>
+<head>
+    <meta charset="utf-8">
+    <title>Element_HTML</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="https://unpkg.com/vxe-table/lib/index.css">
+    <link rel="stylesheet" href="test.css">
+    <script src="https://unpkg.com/vue/dist/vue"></script>
+    <script src="https://unpkg.com/element-ui/lib/index"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xe-utils"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vxe-table"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.bootcss.com/qs/6.5.2/qs.min.js"></script>
+</head>
+<body>
+<!--导航菜单-->
+<div id="navMenu">
+    <div class="line"></div>
+    <el-menu
+            :default-active="activeIndex"
+            class="el-menu-demo"
+            mode="horizontal"
+            @select="handleSelect"
+            background-color="#545c64"
+            text-color="#fff"
+            active-text-color="#ffd04b">
+        <el-menu-item index="1">首页展示</el-menu-item>
+        <el-menu-item index="2">实时数据</el-menu-item>
+        <el-menu-item index="3">历史数据</el-menu-item>
+    </el-menu>
+</div>
+<!--主数据-->
+<div id="vueTable" class="el-main">
+    <!--查询条-->
+    <vxe-form :data="formData" @submit="getStockHistory">
+        <vxe-form-item title="股票类型" field="stockType">
+            <vxe-select v-model="formData.type">
+                <vxe-option value="0" label="沪市"></vxe-option>
+                <vxe-option value="1" label="深市"></vxe-option>
+            </vxe-select>
+        </vxe-form-item>
+        <vxe-form-item title="股票代码" field="code">
+            <vxe-input v-model="formData.code" placeholder="请输入股票代码"></vxe-input>
+        </vxe-form-item>
+        <vxe-form-item title="开始日期" field="sex">
+            <vxe-input v-model="formData.start" placeholder="日期类型" type="date"></vxe-input>
+        </vxe-form-item>
+        <vxe-form-item title="结束日期" field="sex">
+            <vxe-input v-model="formData.end" placeholder="日期类型" type="date"></vxe-input>
+        </vxe-form-item>
+        <vxe-form-item>
+            <vxe-button type="submit" status="primary">查询</vxe-button>
+            <vxe-button type="reset">重置</vxe-button>
+        </vxe-form-item>
+    </vxe-form>
+    <!--主表格-->
+    <vxe-table
+            :seq-config="{startIndex: 0000000}"
+            border
+            resizable
+            show-overflow
+            show-header-overflow
+            highlight-hover-row
+            highlight-current-row
+            export-config
+            ref="xTable"
+            height="600"
+            :loading="loading"
+            :sort-config="{trigger: 'cell'}"
+            :checkbox-config="{checkField: 'checked'}">
+        <!-- 日期,股票代码,名称,收盘价,最高价,最低价,开盘价,前收盘,涨跌额,涨跌幅,换手率,成交量,成交金额,总市值,流通市值,成交笔数 -->
+        <vxe-table-column type="checkbox" width="40" fixed="left"></vxe-table-column>
+        <vxe-table-column type="seq" title="#" width="80" fixed="left"></vxe-table-column>
+        <vxe-table-column field="date" title="日期" width="100" fixed="left" sortable></vxe-table-column>
+        <vxe-table-column field="stockCode" title="股票代码" width="100" sortable></vxe-table-column>
+        <vxe-table-column field="name" title="名称" width="100" sortable></vxe-table-column>
+        <vxe-table-column field="closePrice" title="收盘价" width="90" sortable></vxe-table-column>
+        <vxe-table-column field="topPrice" title="最高价" width="90" sortable></vxe-table-column>
+        <vxe-table-column field="bottomPrice" title="最低价" width="90" sortable></vxe-table-column>
+        <vxe-table-column field="openPrice" title="开盘价" width="90" sortable></vxe-table-column>
+        <vxe-table-column field="beforeClosing" title="前收盘" width="90" sortable></vxe-table-column>
+        <vxe-table-column field="changeAmount" title="涨跌额" width="90" sortable></vxe-table-column>
+        <vxe-table-column field="change" title="涨跌幅" width="90" sortable></vxe-table-column>
+        <vxe-table-column field="turnoverRate" title="换手率" width="90" sortable></vxe-table-column>
+        <vxe-table-column field="tradeCount" title="成交量" width="100" sortable></vxe-table-column>
+        <vxe-table-column field="tradeAmount" title="成交金额" width="120" sortable></vxe-table-column>
+        <vxe-table-column field="totalValue" title="总市值" width="120" sortable></vxe-table-column>
+        <vxe-table-column field="tradeMarketValue" title="流通市值" width="120" sortable></vxe-table-column>
+        <vxe-table-column field="dealCount" title="成交笔数" width="100" sortable></vxe-table-column>
+    </vxe-table>
+</div>
+</body>
+<script type="text/javascript">
+    //// 导航菜单
+    var navMenu = new Vue({
+        el: '#navMenu',
+        data: {
+            activeIndex: '1'
+        },
+        methods: {
+            handleSelect(key, keyPath) {
+                console.log(key, keyPath);
+            }
+        }
+    })
+    //// 表格
+    var tableDataInput = []
+    var vueTable = new Vue({
+        el: "#vueTable",
+        data: {
+            tableData: tableDataInput,
+            loading: false,
+            formData: {}
+        },
+        created: function() {
+            this.formData = {
+                type: '1',
+                code: '000001',
+                start: '2003-01-01',
+                end: this.formatDate(new Date(), 'yyyy-MM-dd')
+            }
+        },
+        methods: {
+            loadList() {
+                this.loading = true
+                const xTable = this.$refs.xTable
+                if (xTable) {
+                    this.$refs.xTable.reloadData(this.tableData).then(() => {
+                        this.loading = false
+                    })
+                }
+            },
+            getStockHistory: function () {
+                tableDataInput.length = 0
+                axios({
+                    method: 'get',
+                    url: vueTable.jointUrl('http://quotes.money.163.com/service/chddata.html', vueTable.formData),
+                    responseType: 'arraybuffer'// 或者 blob
+                }).then(response => {
+                    const blob = new Blob([response.data])
+                    const reader = new FileReader()
+                    reader.onload = function () {
+                        let stockResultArr = this.result.split('\n')
+                        for (let i = 1; i < stockResultArr.length - 1; i++) {
+                            let dataArr = stockResultArr[i].split(',')
+                            let tmp = {
+                                date: dataArr[0],
+                                stockCode: dataArr[1].substring(1, 7),
+                                name: dataArr[2],
+                                closePrice: dataArr[3],
+                                topPrice: dataArr[4],
+                                bottomPrice: dataArr[5],
+                                openPrice: dataArr[6],
+                                beforeClosing: dataArr[7],
+                                changeAmount: dataArr[8],
+                                change: dataArr[9],
+                                turnoverRate: dataArr[10],
+                                tradeCount: dataArr[11],
+                                tradeAmount: dataArr[12],
+                                totalValue: new Number(dataArr[13]),
+                                tradeMarketValue: new Number(dataArr[14]),
+                                dealCount: dataArr[15]
+                            }
+                            tableDataInput.push(tmp)
+                        }
+                        vueTable.loading = true
+                        const xTable = vueTable.$refs.xTable
+                        if (xTable) {
+                            vueTable.$refs.xTable.reloadData(vueTable.tableData).then(() => {
+                                vueTable.loading = false
+                            })
+                        }
+                    }
+                    reader.readAsText(blob, 'gbk')
+                }).catch(error => {
+                    console.log(error)
+                })
+            },
+            jointUrl: function (baseUrl, jsonData) {
+                baseUrl += '?'
+                baseUrl += 'code=' + jsonData['type'] + jsonData['code'] + '&'
+                baseUrl += 'start=' + jsonData['start'].replace(/-/g, "") + '&'
+                baseUrl += 'end=' + jsonData['end'].replace(/-/g, "")
+                return baseUrl
+            },
+            formatDate: function (now, fmt) {
+                let o = {
+                    "M+": now.getMonth() + 1, //月份
+                    "d+": now.getDate(), //日
+                    "H+": now.getHours(), //小时
+                    "m+": now.getMinutes(), //分
+                    "s+": now.getSeconds(), //秒
+                    "q+": Math.floor((now.getMonth() + 3) / 3), //季度
+                    "S": now.getMilliseconds() //毫秒
+                }
+                if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (now.getFullYear() + "").substr(4 - RegExp.$1.length))
+                for (let k in o)
+                    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)))
+                return fmt
+            }
+        }
+    })
+
+    //// 加载数据
+    vueTable.getStockHistory()
+
+</script>
+</html>
