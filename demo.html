@@ -122,15 +122,6 @@
             }
         },
         methods: {
-            loadList() {
-                this.loading = true
-                const xTable = this.$refs.xTable
-                if (xTable) {
-                    this.$refs.xTable.reloadData(this.tableData).then(() => {
-                        this.loading = false
-                    })
-                }
-            },
             getStockHistory: function () {
                 tableDataInput.length = 0
                 axios({
@@ -164,6 +155,7 @@
                             }
                             tableDataInput.push(tmp)
                         }
+                        //// 装载数据
                         vueTable.loading = true
                         const xTable = vueTable.$refs.xTable
                         if (xTable) {
@@ -202,7 +194,7 @@
         }
     })
 
-    //// 加载数据
+    //// 首次加载
     vueTable.getStockHistory()
 
 </script>
