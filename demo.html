@@ -38,7 +38,7 @@
 <!--历史数据-->
 <div id="vueTable" class="el-main" v-show="see">
     <!--查询条-->
-    <vxe-form :data="formData" @submit="getStockHistory">
+    <vxe-form :data="formData" @submit="showStockHistory">
         <vxe-form-item title="股票类型" field="stockType">
             <vxe-select v-model="formData.type">
                 <vxe-option value="0" label="沪市"></vxe-option>
@@ -117,7 +117,7 @@
                 } else {
                     homePage.see = false
                     vueTable.see = true
-                    vueTable.getStockHistory()
+                    vueTable.showStockHistory()
                 }
             }
         }
@@ -233,51 +233,58 @@
             }
         },
         methods: {
-            getStockHistory: function () {
-                tableDataInput.length = 0
-                axios({
-                    method: 'get',
-                    url: vueTable.jointUrl('http://quotes.money.163.com/service/chddata.html', vueTable.formData),
-                    responseType: 'arraybuffer'// 或者 blob
-                }).then(response => {
-                    const blob = new Blob([response.data])
-                    const reader = new FileReader()
-                    reader.onload = function () {
-                        let stockResultArr = this.result.split('\n')
-                        for (let i = 1; i < stockResultArr.length - 1; i++) {
-                            let dataArr = stockResultArr[i].split(',')
-                            let tmp = {
-                                date: dataArr[0],
-                                stockCode: dataArr[1].substring(1, 7),
-                                name: dataArr[2],
-                                closePrice: dataArr[3],
-                                topPrice: dataArr[4],
-                                bottomPrice: dataArr[5],
-                                openPrice: dataArr[6],
-                                beforeClosing: dataArr[7],
-                                changeAmount: dataArr[8],
-                                change: dataArr[9],
-                                turnoverRate: dataArr[10],
-                                tradeCount: dataArr[11],
-                                tradeAmount: dataArr[12],
-                                totalValue: new Number(dataArr[13]),
-                                tradeMarketValue: new Number(dataArr[14]),
-                                dealCount: dataArr[15]
-                            }
-                            tableDataInput.push(tmp)
+            getStockHistory: function (formData) {
+                return new Promise(function (resolve) {
+                    axios({
+                        method: 'get',
+                        url: vueTable.jointUrl('http://quotes.money.163.com/service/chddata.html', formData),
+                        responseType: 'arraybuffer'// 或者 blob
+                    }).then(response => {
+                        const blob = new Blob([response.data])
+                        const reader = new FileReader()
+                        reader.onload = function () {
+                            resolve(this.result)
                         }
-                        //// 装载数据
-                        vueTable.loading = true
-                        const xTable = vueTable.$refs.xTable
-                        if (xTable) {
-                            vueTable.$refs.xTable.reloadData(vueTable.tableData).then(() => {
-                                vueTable.loading = false
-                            })
+                        reader.readAsText(blob, 'gbk')
+                    }).catch(error => {
+                        console.log(error)
+                    })
+                })
+            },
+            showStockHistory: function () {
+                vueTable.getStockHistory(vueTable.formData).then(result=>{
+                    tableDataInput.length = 0
+                    let stockResultArr = result.split('\n')
+                    for (let i = 1; i < stockResultArr.length - 1; i++) {
+                        let dataArr = stockResultArr[i].split(',')
+                        let tmp = {
+                            date: dataArr[0],
+                            stockCode: dataArr[1].substring(1, 7),
+                            name: dataArr[2],
+                            closePrice: dataArr[3],
+                            topPrice: dataArr[4],
+                            bottomPrice: dataArr[5],
+                            openPrice: dataArr[6],
+                            beforeClosing: dataArr[7],
+                            changeAmount: dataArr[8],
+                            change: dataArr[9],
+                            turnoverRate: dataArr[10],
+                            tradeCount: dataArr[11],
+                            tradeAmount: dataArr[12],
+                            totalValue: new Number(dataArr[13]),
+                            tradeMarketValue: new Number(dataArr[14]),
+                            dealCount: dataArr[15]
                         }
+                        tableDataInput.push(tmp)
                     }
-                    reader.readAsText(blob, 'gbk')
-                }).catch(error => {
-                    console.log(error)
+                    //// 装载数据
+                    vueTable.loading = true
+                    const xTable = vueTable.$refs.xTable
+                    if (xTable) {
+                        vueTable.$refs.xTable.reloadData(vueTable.tableData).then(() => {
+                            vueTable.loading = false
+                        })
+                    }
                 })
             },
             jointUrl: function (baseUrl, jsonData) {
