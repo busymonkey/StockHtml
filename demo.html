@@ -172,13 +172,13 @@
                     },
                     xAxis: {
                         type: 'category',
-                        data: dateArr
+                        data: dateArr.reverse()
                     },
                     yAxis: {
                         type: 'value'
                     },
                     series: [{
-                        data: closePriceArr,
+                        data: closePriceArr.reverse(),
                         type: 'line',
                         smooth: true,  // 开启平滑处理。true的平滑程度相当于0.5
                         // symbol: 'none', // 标记的图形。
@@ -188,7 +188,7 @@
                     dataZoom: [{
                         type: 'inside',
                         start: 0,
-                        end: 10
+                        end: 100
                     }, {
                         start: 0,
                         end: 10,                  // handleIcon 手柄的 icon 形状，支持路径字符串
