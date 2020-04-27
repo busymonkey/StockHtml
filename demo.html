@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vxe-table"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdn.bootcss.com/qs/6.5.2/qs.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.7.0/echarts.min.js"></script>
 </head>
 <body>
 <!--导航菜单-->
@@ -30,8 +31,12 @@
         <el-menu-item index="3">历史数据</el-menu-item>
     </el-menu>
 </div>
-<!--主数据-->
-<div id="vueTable" class="el-main">
+<!--首页展示-->
+<div id="homePage" style="width: auto;height:400px;" v-show="see" ref="homePageCharts">
+
+</div>
+<!--历史数据-->
+<div id="vueTable" class="el-main" v-show="see">
     <!--查询条-->
     <vxe-form :data="formData" @submit="getStockHistory">
         <vxe-form-item title="股票类型" field="stockType">
@@ -92,6 +97,8 @@
 </div>
 </body>
 <script type="text/javascript">
+    //// 表格数据
+    var tableDataInput = []
     //// 导航菜单
     var navMenu = new Vue({
         el: '#navMenu',
@@ -99,21 +106,125 @@
             activeIndex: '1'
         },
         methods: {
-            handleSelect(key, keyPath) {
-                console.log(key, keyPath);
+            handleSelect(key) {
+                if (key == 1) {
+                    homePage.see = true
+                    vueTable.see = false
+                    homePage.getDemoChart()
+                } else if (key == 2) {
+                    homePage.see = false
+                    vueTable.see = false
+                } else {
+                    homePage.see = false
+                    vueTable.see = true
+                    vueTable.getStockHistory()
+                }
             }
         }
     })
-    //// 表格
-    var tableDataInput = []
+    //// 首页展示
+    var homePage = new Vue({
+        el: '#homePage',
+        data: {
+            see: true
+        },
+        methods: {
+            getDemoChart: function () {
+                //// 基于准备好的dom，初始化echarts实例
+                let myChart = echarts.init(this.$refs.homePageCharts)
+                //// 指定图表的配置项和数据
+                console.log(tableDataInput)
+                let dateArr = []
+                let closePriceArr = []
+                for (let i = 0; i < tableDataInput.length; i++) {
+                    if (tableDataInput[i]['closePrice'] == 0.0) {
+                        closePriceArr.push(closePriceArr[i - 1])
+                    } else {
+                        closePriceArr.push(tableDataInput[i]['closePrice'])
+                    }
+                    dateArr.push(tableDataInput[i]['date'])
+                }
+                const option = {
+                    tooltip: {
+                        //// 当trigger为’item’时只会显示该点的数据，为’axis’时显示该列下所有坐标轴所对应的数据。
+                        trigger: 'axis',
+                        //// 提示框的位置
+                        position: function (pt) {
+                            return [pt[0], '10%']
+                        }
+                    },
+                    title: {
+                        text: '收盘价'
+                    },
+                    toolbox: {
+                        //// feature 各工具配置项: dataZoom 数据区域缩放;restore 配置项还原;saveAsImage下载为图片;magicType动态类型切换
+                        feature: {
+                            dataZoom: {
+                                //// y轴不缩放，Index默认为0
+                                yAxisIndex: 'none'
+                            },
+                            restore: {},
+                            saveAsImage: {},
+                            magicType: {
+                                type: ['bar', 'line']
+                            }
+                        }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: dateArr
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: closePriceArr,
+                        type: 'line',
+                        smooth: true,  // 开启平滑处理。true的平滑程度相当于0.5
+                        // symbol: 'none', // 标记的图形。
+                        // sampling: 'average' //  取过滤点的平均值
+                    }],
+                    //// 内置于坐标系中，使用户可以在坐标系上通过鼠标拖拽、鼠标滚轮、手指滑动（触屏上）来缩放或漫游坐标系
+                    dataZoom: [{
+                        type: 'inside',
+                        start: 0,
+                        end: 10
+                    }, {
+                        start: 0,
+                        end: 10,                  // handleIcon 手柄的 icon 形状，支持路径字符串
+                        handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                        handleSize: '80%',        //  控制手柄的尺寸，可以是像素大小，也可以是相对于 dataZoom 组件宽度的百分比，默认跟 dataZoom 宽度相同。
+                        handleStyle: {
+                            color: 'pink',
+                            shadowBlur: 3,      // shadowBlur图片阴影模糊值，shadowColor阴影的颜色
+                            shadowColor: 'red',
+                            shadowOffsetX: 2,
+                            shadowOffsetY: 2
+                        }
+                    }],
+                    //// 表格起始位置
+                    grid: {
+                        show: true,
+                        x: 60,
+                        y: 60
+                    },
+                }
+                //// 使用刚指定的配置项和数据显示图表。
+                myChart.setOption(option)
+            }
+        }
+    })
+    homePage.getDemoChart()
+    //// 历史数据表格
     var vueTable = new Vue({
         el: "#vueTable",
         data: {
             tableData: tableDataInput,
             loading: false,
-            formData: {}
+            formData: {},
+            see: false
         },
-        created: function() {
+        created: function () {
             this.formData = {
                 type: '1',
                 code: '000001',
@@ -194,8 +305,6 @@
         }
     })
 
-    //// 首次加载
-    vueTable.getStockHistory()
 
 </script>
 </html>
