@@ -27,20 +27,17 @@
             text-color="#fff"
             active-text-color="#ffd04b">
         <el-menu-item index="1">首页展示</el-menu-item>
-        <el-menu-item index="2">实时数据</el-menu-item>
-        <el-menu-item index="3">历史数据</el-menu-item>
+        <el-menu-item index="2">多股数据</el-menu-item>
+        <el-menu-item index="3">单股数据</el-menu-item>
     </el-menu>
 </div>
 <!--首页展示-->
-<div id="homePage" style="width: auto;height:400px;" v-show="see" ref="homePageCharts">
-
-</div>
-<!--历史数据-->
-<div id="vueTable" class="el-main" v-show="see">
+<!--单股数据-->
+<div id="singleStockTable" class="el-main" v-show="see">
     <!--查询条-->
     <vxe-form :data="formData" @submit="showStockHistory">
         <vxe-form-item title="股票类型" field="stockType">
-            <vxe-select v-model="formData.type">
+            <vxe-select v-model="formData.stockType">
                 <vxe-option value="0" label="沪市"></vxe-option>
                 <vxe-option value="1" label="深市"></vxe-option>
             </vxe-select>
@@ -48,11 +45,11 @@
         <vxe-form-item title="股票代码" field="code">
             <vxe-input v-model="formData.code" placeholder="请输入股票代码"></vxe-input>
         </vxe-form-item>
-        <vxe-form-item title="开始日期" field="sex">
-            <vxe-input v-model="formData.start" placeholder="日期类型" type="date"></vxe-input>
+        <vxe-form-item title="开始日期" field="startDate">
+            <vxe-input v-model="formData.startDate" placeholder="日期类型" type="date"></vxe-input>
         </vxe-form-item>
-        <vxe-form-item title="结束日期" field="sex">
-            <vxe-input v-model="formData.end" placeholder="日期类型" type="date"></vxe-input>
+        <vxe-form-item title="结束日期" field="endDate">
+            <vxe-input v-model="formData.endDate" placeholder="日期类型" type="date"></vxe-input>
         </vxe-form-item>
         <vxe-form-item>
             <vxe-button type="submit" status="primary">查询</vxe-button>
@@ -70,7 +67,7 @@
             highlight-current-row
             export-config
             ref="xTable"
-            height="600"
+            height="300"
             :loading="loading"
             :sort-config="{trigger: 'cell'}"
             :checkbox-config="{checkField: 'checked'}">
@@ -95,10 +92,10 @@
         <vxe-table-column field="dealCount" title="成交笔数" width="100" sortable></vxe-table-column>
     </vxe-table>
 </div>
+<div id="singleStockChart" class="el-main" style="width: auto;height:400px;" v-show="see" ref="singleStockChart">
+</div>
 </body>
 <script type="text/javascript">
-    //// 表格数据
-    var tableDataInput = []
     //// 导航菜单
     var navMenu = new Vue({
         el: '#navMenu',
@@ -108,41 +105,55 @@
         methods: {
             handleSelect(key) {
                 if (key == 1) {
-                    homePage.see = true
-                    vueTable.see = false
-                    homePage.getDemoChart()
+                    singleStockTable.see = false
+                    singleStockChart.see = false
                 } else if (key == 2) {
-                    homePage.see = false
-                    vueTable.see = false
+                    singleStockTable.see = false
+                    singleStockChart.see = false
                 } else {
-                    homePage.see = false
-                    vueTable.see = true
-                    vueTable.showStockHistory()
+                    singleStockTable.see = true
+                    singleStockChart.see = true
+                    singleStockTable.showStockHistory()
                 }
             }
         }
     })
-    //// 首页展示
-    var homePage = new Vue({
-        el: '#homePage',
+    //// 单股图表
+    var singleStockChart = new Vue({
+        el: '#singleStockChart',
         data: {
             see: true
         },
         methods: {
-            getDemoChart: function () {
+            getDemoChart: function (ref, stockData) {
                 //// 基于准备好的dom，初始化echarts实例
-                let myChart = echarts.init(this.$refs.homePageCharts)
+                let myChart = echarts.init(ref)
                 //// 指定图表的配置项和数据
-                console.log(tableDataInput)
-                let dateArr = []
-                let closePriceArr = []
-                for (let i = 0; i < tableDataInput.length; i++) {
-                    if (tableDataInput[i]['closePrice'] == 0.0) {
-                        closePriceArr.push(closePriceArr[i - 1])
-                    } else {
-                        closePriceArr.push(tableDataInput[i]['closePrice'])
+                let legendArr = []
+                let xAxisData = []
+                let seriesData = []
+                for (let key in stockData) {
+                    if (key == 'test') {
+                        continue
                     }
-                    dateArr.push(tableDataInput[i]['date'])
+                    legendArr.push(key)
+                    let loSeresData = []
+                    for (let i = 0; i < stockData[key].length; i++) {
+                        if (stockData[key][i]['closePrice'] == 0.0) {
+                            loSeresData.push(loSeresData[i - 1])
+                        } else {
+                            loSeresData.push(stockData[key][i]['closePrice'])
+                        }
+                        xAxisData.push(stockData[key][i]['date'])
+                    }
+                    let tmp = {
+                        name: key,
+                        type: 'line',
+                        stack: 'total',
+                        smooth: true,
+                        data: loSeresData
+                    }
+                    seriesData.push(tmp)
                 }
                 const option = {
                     tooltip: {
@@ -152,6 +163,9 @@
                         position: function (pt) {
                             return [pt[0], '10%']
                         }
+                    },
+                    legend: {
+                        data: legendArr
                     },
                     title: {
                         text: '收盘价'
@@ -172,18 +186,12 @@
                     },
                     xAxis: {
                         type: 'category',
-                        data: dateArr.reverse()
+                        data: xAxisData
                     },
                     yAxis: {
                         type: 'value'
                     },
-                    series: [{
-                        data: closePriceArr.reverse(),
-                        type: 'line',
-                        smooth: true,  // 开启平滑处理。true的平滑程度相当于0.5
-                        // symbol: 'none', // 标记的图形。
-                        // sampling: 'average' //  取过滤点的平均值
-                    }],
+                    series: seriesData,
                     //// 内置于坐标系中，使用户可以在坐标系上通过鼠标拖拽、鼠标滚轮、手指滑动（触屏上）来缩放或漫游坐标系
                     dataZoom: [{
                         type: 'inside',
@@ -203,33 +211,32 @@
                         }
                     }],
                     //// 表格起始位置
-                    // grid: {
-                    //     show: true,
-                    //     x: 60,
-                    //     y: 60
-                    // },
+                    grid: {
+                        show: true,
+                        x: 40,
+                        x2: 40,
+                        y: 50
+                    },
                 }
                 //// 使用刚指定的配置项和数据显示图表。
                 myChart.setOption(option)
             }
         }
     })
-    homePage.getDemoChart()
     //// 历史数据表格
-    var vueTable = new Vue({
-        el: "#vueTable",
+    var singleStockTable = new Vue({
+        el: "#singleStockTable",
         data: {
-            tableData: tableDataInput,
             loading: false,
             formData: {},
             see: false
         },
         created: function () {
             this.formData = {
-                type: '1',
+                stockType: '1',
                 code: '000001',
-                start: '2003-01-01',
-                end: this.formatDate(new Date(), 'yyyy-MM-dd')
+                startDate: '2003-01-01',
+                endDate: this.formatDate(new Date(), 'yyyy-MM-dd')
             }
         },
         methods: {
@@ -237,7 +244,7 @@
                 return new Promise(function (resolve) {
                     axios({
                         method: 'get',
-                        url: vueTable.jointUrl('http://quotes.money.163.com/service/chddata.html', formData),
+                        url: singleStockTable.jointUrl('http://quotes.money.163.com/service/chddata.html', formData),
                         responseType: 'arraybuffer'// 或者 blob
                     }).then(response => {
                         const blob = new Blob([response.data])
@@ -252,11 +259,13 @@
                 })
             },
             showStockHistory: function () {
-                vueTable.getStockHistory(vueTable.formData).then(result=>{
-                    tableDataInput.length = 0
+                singleStockTable.getStockHistory(singleStockTable.formData).then(result=>{
+                    let loStockName
+                    let loStockData = []
                     let stockResultArr = result.split('\n')
                     for (let i = 1; i < stockResultArr.length - 1; i++) {
                         let dataArr = stockResultArr[i].split(',')
+                        loStockName = dataArr[2]
                         let tmp = {
                             date: dataArr[0],
                             stockCode: dataArr[1].substring(1, 7),
@@ -275,23 +284,26 @@
                             tradeMarketValue: new Number(dataArr[14]),
                             dealCount: dataArr[15]
                         }
-                        tableDataInput.push(tmp)
+                        loStockData.push(tmp)
                     }
+                    let stockData = {}
+                    stockData[loStockName] = loStockData
                     //// 装载数据
-                    vueTable.loading = true
-                    const xTable = vueTable.$refs.xTable
+                    singleStockTable.loading = true
+                    const xTable = singleStockTable.$refs.xTable
                     if (xTable) {
-                        vueTable.$refs.xTable.reloadData(vueTable.tableData).then(() => {
-                            vueTable.loading = false
+                        singleStockTable.$refs.xTable.reloadData(loStockData).then(() => {
+                            singleStockTable.loading = false
                         })
                     }
+                    singleStockChart.getDemoChart(singleStockChart.$refs.singleStockChart, stockData)
                 })
             },
             jointUrl: function (baseUrl, jsonData) {
                 baseUrl += '?'
-                baseUrl += 'code=' + jsonData['type'] + jsonData['code'] + '&'
-                baseUrl += 'start=' + jsonData['start'].replace(/-/g, "") + '&'
-                baseUrl += 'end=' + jsonData['end'].replace(/-/g, "")
+                baseUrl += 'code=' + jsonData['stockType'] + jsonData['code'] + '&'
+                baseUrl += 'start=' + jsonData['startDate'].replace(/-/g, "") + '&'
+                baseUrl += 'end=' + jsonData['endDate'].replace(/-/g, "")
                 return baseUrl
             },
             formatDate: function (now, fmt) {
@@ -311,7 +323,6 @@
             }
         }
     })
-
 
 </script>
 </html>
