@@ -199,7 +199,7 @@
                 stockType: '1',
                 startCode: '000001',
                 endCode: '000010',
-                startDate: '2020-01-01',
+                startDate: '2019-01-01',
                 endDate: this.formatDate(new Date(), 'yyyy-MM-dd')
             }
         },
@@ -242,7 +242,7 @@
                         let stockResultArr = result.split('\n')
                         for (let i = 1; i < stockResultArr.length - 1; i++) {
                             let dataArr = stockResultArr[i].split(',')
-                            loStockName = dataArr[2]
+                            loStockName = dataArr[2] + '(' + dataArr[1].substring(1, 7) + ')'
                             let tmp = {
                                 date: dataArr[0],
                                 stockCode: dataArr[1].substring(1, 7),
