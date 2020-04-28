@@ -25,8 +25,11 @@
                 <vxe-option value="1" label="深市"></vxe-option>
             </vxe-select>
         </vxe-form-item>
-        <vxe-form-item title="股票代码" field="code">
-            <vxe-input v-model="formData.code" placeholder="请输入股票代码"></vxe-input>
+        <vxe-form-item title="起始股票代码" field="startCode">
+            <vxe-input v-model="formData.startCode" placeholder="请输入起始股票代码"></vxe-input>
+        </vxe-form-item>
+        <vxe-form-item title="结束股票代码" field="endCode">
+            <vxe-input v-model="formData.endCode" placeholder="请输入结束股票代码"></vxe-input>
         </vxe-form-item>
         <vxe-form-item title="开始日期" field="startDate">
             <vxe-input v-model="formData.startDate" placeholder="日期类型" type="date"></vxe-input>
@@ -75,15 +78,14 @@
         <vxe-table-column field="dealCount" title="成交笔数" width="100" sortable></vxe-table-column>
     </vxe-table>
 </div>
-<div id="singleStockChart" class="el-main" style="width: auto;height:400px;" ref="singleStockChart">
+<div id="singleStockChart" class="el-main" style="width: auto;height:500px;" ref="singleStockChart">
 </div>
 </body>
 <script type="text/javascript">
     //// 单股图表
     let singleStockChart = new Vue({
         el: '#singleStockChart',
-        data: {
-        },
+        data: {},
         methods: {
             getDemoChart: function (ref, stockData) {
                 //// 基于准备好的dom，初始化echarts实例
@@ -93,7 +95,7 @@
                 let xAxisData = []
                 let seriesData = []
                 for (let key in stockData) {
-                    if (key == 'test') {
+                    if (key == 'undefined') {
                         continue
                     }
                     legendArr.push(key)
@@ -104,12 +106,13 @@
                         } else {
                             loSeresData.push(stockData[key][i]['closePrice'])
                         }
-                        xAxisData.push(stockData[key][i]['date'])
+                        if (xAxisData.length < stockData[key].length) {
+                            xAxisData.push(stockData[key][i]['date'])
+                        }
                     }
                     let tmp = {
                         name: key,
                         type: 'line',
-                        stack: 'total',
                         smooth: true,
                         data: loSeresData.reverse()
                     }
@@ -159,7 +162,7 @@
                         end: 100
                     }, {
                         start: 0,
-                        end: 10,                  // handleIcon 手柄的 icon 形状，支持路径字符串
+                        end: 100,                  // handleIcon 手柄的 icon 形状，支持路径字符串
                         handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
                         handleSize: '80%',        //  控制手柄的尺寸，可以是像素大小，也可以是相对于 dataZoom 组件宽度的百分比，默认跟 dataZoom 宽度相同。
                         handleStyle: {
@@ -174,7 +177,7 @@
                     grid: {
                         show: true,
                         x: 40,
-                        x2: 40,
+                        x2: 110,
                         y: 50
                     },
                 }
@@ -193,8 +196,9 @@
         created: function () {
             this.formData = {
                 stockType: '1',
-                code: '000001',
-                startDate: '2003-01-01',
+                startCode: '000001',
+                endCode: '000010',
+                startDate: '2020-01-01',
                 endDate: this.formatDate(new Date(), 'yyyy-MM-dd')
             }
         },
@@ -218,45 +222,61 @@
                 })
             },
             showStockHistory: function () {
-                singleStockTable.getStockHistory(singleStockTable.formData).then(result=>{
-                    let loStockName
-                    let loStockData = []
-                    let stockResultArr = result.split('\n')
-                    for (let i = 1; i < stockResultArr.length - 1; i++) {
-                        let dataArr = stockResultArr[i].split(',')
-                        loStockName = dataArr[2]
-                        let tmp = {
-                            date: dataArr[0],
-                            stockCode: dataArr[1].substring(1, 7),
-                            name: dataArr[2],
-                            closePrice: dataArr[3],
-                            topPrice: dataArr[4],
-                            bottomPrice: dataArr[5],
-                            openPrice: dataArr[6],
-                            beforeClosing: dataArr[7],
-                            changeAmount: dataArr[8],
-                            change: dataArr[9],
-                            turnoverRate: dataArr[10],
-                            tradeCount: dataArr[11],
-                            tradeAmount: dataArr[12],
-                            totalValue: new Number(dataArr[13]),
-                            tradeMarketValue: new Number(dataArr[14]),
-                            dealCount: dataArr[15]
+                let stockChartData = {}
+                let stockTableDate = []
+                let count = 0
+                for (let i = new Number(singleStockTable.formData['startCode']); i <= new Number(singleStockTable.formData['endCode']); i++) {
+                    let loCode = '00000'+i;
+                    loCode = loCode.substring(loCode.length-6, loCode.length)
+                    let loFormData = {
+                        stockType: singleStockTable.formData['stockType'],
+                        code: loCode,
+                        startDate: singleStockTable.formData['startDate'],
+                        endDate: singleStockTable.formData['endDate']
+                    }
+                    singleStockTable.getStockHistory(loFormData).then(result => {
+                        count++
+                        let loStockName
+                        let loStockData = []
+                        let stockResultArr = result.split('\n')
+                        for (let i = 1; i < stockResultArr.length - 1; i++) {
+                            let dataArr = stockResultArr[i].split(',')
+                            loStockName = dataArr[2]
+                            let tmp = {
+                                date: dataArr[0],
+                                stockCode: dataArr[1].substring(1, 7),
+                                name: dataArr[2],
+                                closePrice: dataArr[3],
+                                topPrice: dataArr[4],
+                                bottomPrice: dataArr[5],
+                                openPrice: dataArr[6],
+                                beforeClosing: dataArr[7],
+                                changeAmount: dataArr[8],
+                                change: dataArr[9],
+                                turnoverRate: dataArr[10],
+                                tradeCount: dataArr[11],
+                                tradeAmount: dataArr[12],
+                                totalValue: new Number(dataArr[13]),
+                                tradeMarketValue: new Number(dataArr[14]),
+                                dealCount: dataArr[15]
+                            }
+                            loStockData.push(tmp)
+                            stockTableDate.push(tmp)
                         }
-                        loStockData.push(tmp)
-                    }
-                    let stockData = {}
-                    stockData[loStockName] = loStockData
-                    //// 装载数据
-                    singleStockTable.loading = true
-                    const xTable = singleStockTable.$refs.xTable
-                    if (xTable) {
-                        singleStockTable.$refs.xTable.reloadData(loStockData).then(() => {
-                            singleStockTable.loading = false
-                        })
-                    }
-                    singleStockChart.getDemoChart(singleStockChart.$refs.singleStockChart, stockData)
-                })
+                        stockChartData[loStockName] = loStockData
+                        if (count == new Number(singleStockTable.formData['endCode'])) {
+                            //// 装载数据
+                            singleStockTable.loading = true
+                            const xTable = singleStockTable.$refs.xTable
+                            if (xTable) {
+                                singleStockTable.$refs.xTable.reloadData(stockTableDate).then(() => {
+                                    singleStockTable.loading = false
+                                })
+                            }
+                            singleStockChart.getDemoChart(singleStockChart.$refs.singleStockChart, stockChartData)
+                        }
+                    })
+                }
             },
             jointUrl: function (baseUrl, jsonData) {
                 baseUrl += '?'
@@ -282,6 +302,7 @@
             }
         }
     })
+    //// 数据加载
     singleStockTable.showStockHistory()
 </script>
 </html>
