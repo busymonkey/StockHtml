@@ -15,25 +15,8 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.7.0/echarts.min.js"></script>
 </head>
 <body>
-<!--导航菜单-->
-<div id="navMenu">
-    <div class="line"></div>
-    <el-menu
-            :default-active="activeIndex"
-            class="el-menu-demo"
-            mode="horizontal"
-            @select="handleSelect"
-            background-color="#545c64"
-            text-color="#fff"
-            active-text-color="#ffd04b">
-        <el-menu-item index="1">首页展示</el-menu-item>
-        <el-menu-item index="2">多股数据</el-menu-item>
-        <el-menu-item index="3">单股数据</el-menu-item>
-    </el-menu>
-</div>
-<!--首页展示-->
 <!--单股数据-->
-<div id="singleStockTable" class="el-main" v-show="see">
+<div id="singleStockTable" class="el-main">
     <!--查询条-->
     <vxe-form :data="formData" @submit="showStockHistory">
         <vxe-form-item title="股票类型" field="stockType">
@@ -76,7 +59,7 @@
         <vxe-table-column type="seq" title="#" width="80" fixed="left"></vxe-table-column>
         <vxe-table-column field="date" title="日期" width="100" fixed="left" sortable></vxe-table-column>
         <vxe-table-column field="stockCode" title="股票代码" width="100" sortable></vxe-table-column>
-        <vxe-table-column field="name" title="名称" width="100" sortable></vxe-table-column>
+        <vxe-table-column field="name" title="名称" width="120" sortable></vxe-table-column>
         <vxe-table-column field="closePrice" title="收盘价" width="90" sortable></vxe-table-column>
         <vxe-table-column field="topPrice" title="最高价" width="90" sortable></vxe-table-column>
         <vxe-table-column field="bottomPrice" title="最低价" width="90" sortable></vxe-table-column>
@@ -84,45 +67,22 @@
         <vxe-table-column field="beforeClosing" title="前收盘" width="90" sortable></vxe-table-column>
         <vxe-table-column field="changeAmount" title="涨跌额" width="90" sortable></vxe-table-column>
         <vxe-table-column field="change" title="涨跌幅" width="90" sortable></vxe-table-column>
-        <vxe-table-column field="turnoverRate" title="换手率" width="90" sortable></vxe-table-column>
-        <vxe-table-column field="tradeCount" title="成交量" width="100" sortable></vxe-table-column>
-        <vxe-table-column field="tradeAmount" title="成交金额" width="120" sortable></vxe-table-column>
-        <vxe-table-column field="totalValue" title="总市值" width="120" sortable></vxe-table-column>
-        <vxe-table-column field="tradeMarketValue" title="流通市值" width="120" sortable></vxe-table-column>
+        <vxe-table-column field="turnoverRate" title="换手率" width="100" sortable></vxe-table-column>
+        <vxe-table-column field="tradeCount" title="成交量" width="120" sortable></vxe-table-column>
+        <vxe-table-column field="tradeAmount" title="成交金额" width="140" sortable></vxe-table-column>
+        <vxe-table-column field="totalValue" title="总市值" width="140" sortable></vxe-table-column>
+        <vxe-table-column field="tradeMarketValue" title="流通市值" width="140" sortable></vxe-table-column>
         <vxe-table-column field="dealCount" title="成交笔数" width="100" sortable></vxe-table-column>
     </vxe-table>
 </div>
-<div id="singleStockChart" class="el-main" style="width: auto;height:400px;" v-show="see" ref="singleStockChart">
+<div id="singleStockChart" class="el-main" style="width: auto;height:400px;" ref="singleStockChart">
 </div>
 </body>
 <script type="text/javascript">
-    //// 导航菜单
-    var navMenu = new Vue({
-        el: '#navMenu',
-        data: {
-            activeIndex: '1'
-        },
-        methods: {
-            handleSelect(key) {
-                if (key == 1) {
-                    singleStockTable.see = false
-                    singleStockChart.see = false
-                } else if (key == 2) {
-                    singleStockTable.see = false
-                    singleStockChart.see = false
-                } else {
-                    singleStockTable.see = true
-                    singleStockChart.see = true
-                    singleStockTable.showStockHistory()
-                }
-            }
-        }
-    })
     //// 单股图表
-    var singleStockChart = new Vue({
+    let singleStockChart = new Vue({
         el: '#singleStockChart',
         data: {
-            see: true
         },
         methods: {
             getDemoChart: function (ref, stockData) {
@@ -151,7 +111,7 @@
                         type: 'line',
                         stack: 'total',
                         smooth: true,
-                        data: loSeresData
+                        data: loSeresData.reverse()
                     }
                     seriesData.push(tmp)
                 }
@@ -186,7 +146,7 @@
                     },
                     xAxis: {
                         type: 'category',
-                        data: xAxisData
+                        data: xAxisData.reverse()
                     },
                     yAxis: {
                         type: 'value'
@@ -224,12 +184,11 @@
         }
     })
     //// 历史数据表格
-    var singleStockTable = new Vue({
+    let singleStockTable = new Vue({
         el: "#singleStockTable",
         data: {
             loading: false,
-            formData: {},
-            see: false
+            formData: {}
         },
         created: function () {
             this.formData = {
@@ -323,6 +282,6 @@
             }
         }
     })
-
+    singleStockTable.showStockHistory()
 </script>
 </html>
