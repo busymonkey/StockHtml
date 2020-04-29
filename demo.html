@@ -15,7 +15,10 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.7.0/echarts.min.js"></script>
 </head>
 <body>
-<!--单股数据-->
+<!--大盘-->
+<div id="hsChart" class="el-main" style="width: auto;height:350px;" ref="hsChart">
+</div>
+<!--表格数据-->
 <div id="singleStockTable" class="el-main">
     <!--查询条-->
     <vxe-form :data="formData" @submit="showStockHistory">
@@ -78,6 +81,7 @@
         <vxe-table-column field="dealCount" title="成交笔数" width="100" sortable></vxe-table-column>
     </vxe-table>
 </div>
+<!--个股-->
 <div id="singleStockChart" class="el-main" style="width: auto;height:500px;" ref="singleStockChart">
 </div>
 </body>
@@ -313,7 +317,56 @@
             }
         }
     })
+    //// 沪市图表
+    let hsChart = new Vue({
+        el: '#hsChart',
+        data: {},
+        methods: {
+            showHSChart: function () {
+                let loFormData = {
+                    stockType: '0',
+                    code: '000001',
+                    startDate: '2003-01-01',
+                    endDate: singleStockTable.formatDate(new Date(), 'yyyy-MM-dd')
+                }
+                singleStockTable.getStockHistory(loFormData).then(result => {
+                    let stockChartData = {}
+                    let loStockName
+                    let loStockData = []
+                    let stockResultArr = result.split('\n')
+                    for (let i = 1; i < stockResultArr.length - 1; i++) {
+                        let dataArr = stockResultArr[i].split(',')
+                        if (i == 1) {
+                            loStockName = dataArr[2] + '(' + dataArr[1].substring(1, 7) + ')'
+                        }
+                        let tmp = {
+                            date: dataArr[0],
+                            stockCode: dataArr[1].substring(1, 7),
+                            name: dataArr[2],
+                            closePrice: dataArr[3],
+                            topPrice: dataArr[4],
+                            bottomPrice: dataArr[5],
+                            openPrice: dataArr[6],
+                            beforeClosing: dataArr[7],
+                            changeAmount: dataArr[8],
+                            change: dataArr[9],
+                            turnoverRate: dataArr[10],
+                            tradeCount: dataArr[11],
+                            tradeAmount: dataArr[12],
+                            totalValue: new Number(dataArr[13]),
+                            tradeMarketValue: new Number(dataArr[14]),
+                            dealCount: dataArr[15]
+                        }
+                        loStockData.push(tmp)
+                    }
+                    stockChartData[loStockName] = loStockData
+                    singleStockChart.getDemoChart(hsChart.$refs.hsChart, stockChartData)
+                })
+            }
+        }
+    })
     //// 数据加载
+    hsChart.showHSChart()
     singleStockTable.showStockHistory()
 </script>
 </html>
