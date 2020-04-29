@@ -114,7 +114,15 @@
                         name: key,
                         type: 'line',
                         smooth: true,
-                        data: loSeresData.reverse()
+                        data: loSeresData.reverse(),
+                        markPoint: {
+                            symbol: "pin", //标注类型
+                            symbolSize: 30, //标记大小
+                            data: [
+                                {type: "max", name: "最大值"},
+                                {type: "min", name: "最小值"}
+                            ]
+                        }
                     }
                     seriesData.push(tmp)
                 }
