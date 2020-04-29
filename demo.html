@@ -250,7 +250,9 @@
                         let stockResultArr = result.split('\n')
                         for (let i = 1; i < stockResultArr.length - 1; i++) {
                             let dataArr = stockResultArr[i].split(',')
-                            loStockName = dataArr[2] + '(' + dataArr[1].substring(1, 7) + ')'
+                            if (i == 1) {
+                                loStockName = dataArr[2] + '(' + dataArr[1].substring(1, 7) + ')'
+                            }
                             let tmp = {
                                 date: dataArr[0],
                                 stockCode: dataArr[1].substring(1, 7),
