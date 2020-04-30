@@ -15,9 +15,6 @@
     <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.7.0/echarts.min.js"></script>
 </head>
 <body>
-<!--大盘-->
-<div id="hsChart" class="el-main" style="width: auto;height:350px;" ref="hsChart">
-</div>
 <!--表格数据-->
 <div id="singleStockTable" class="el-main">
     <!--查询条-->
@@ -84,6 +81,9 @@
 <!--个股-->
 <div id="singleStockChart" class="el-main" style="width: auto;height:500px;" ref="singleStockChart">
 </div>
+<!--大盘-->
+<div id="hsChart" class="el-main" style="width: auto;height:350px;" ref="hsChart">
+</div>
 </body>
 <script type="text/javascript">
     //// 单股图表
@@ -91,7 +91,7 @@
         el: '#singleStockChart',
         data: {},
         methods: {
-            getDemoChart: function (ref, stockData) {
+            getDemoChart: function (ref, stockData, title) {
                 //// 基于准备好的dom，初始化echarts实例
                 let myChart = echarts.init(ref)
                 //// 指定图表的配置项和数据
@@ -143,7 +143,7 @@
                         data: legendArr
                     },
                     title: {
-                        text: '收盘价'
+                        text: title
                     },
                     toolbox: {
                         //// feature 各工具配置项: dataZoom 数据区域缩放;restore 配置项还原;saveAsImage下载为图片;magicType动态类型切换
@@ -292,7 +292,7 @@
                                     singleStockTable.loading = false
                                 })
                             }
-                            singleStockChart.getDemoChart(singleStockChart.$refs.singleStockChart, stockChartData)
+                            singleStockChart.getDemoChart(singleStockChart.$refs.singleStockChart, stockChartData, '收盘价')
                         }
                     })
                 }
@@ -364,7 +364,7 @@
                         loStockData.push(tmp)
                     }
                     stockChartData[loStockName] = loStockData
-                    singleStockChart.getDemoChart(hsChart.$refs.hsChart, stockChartData)
+                    singleStockChart.getDemoChart(hsChart.$refs.hsChart, stockChartData, '历史大盘走势')
                 })
             }
         }
