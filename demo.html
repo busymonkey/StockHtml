@@ -275,10 +275,14 @@
                                 tradeMarketValue: new Number(dataArr[14]),
                                 dealCount: dataArr[15]
                             }
-                            loStockData.push(tmp)
-                            stockTableDate.push(tmp)
+                            if (loStockName != undefined && loStockName.indexOf('*ST') == -1) {
+                                loStockData.push(tmp)
+                                stockTableDate.push(tmp)
+                            }
                         }
-                        stockChartData[loStockName] = loStockData
+                        if (loStockName != undefined && loStockName.indexOf('*ST') == -1) {
+                            stockChartData[loStockName] = loStockData
+                        }
                         if (count == new Number(singleStockTable.formData['endCode']) - new Number(singleStockTable.formData['startCode']) + 1) {
                             //// 装载数据
                             singleStockTable.loading = true
