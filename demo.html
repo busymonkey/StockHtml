@@ -1,150 +1,150 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Element_HTML</title>
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-    <link rel="stylesheet" href="https://unpkg.com/vxe-table/lib/index.css">
-    <link rel="stylesheet" href="test.css">
-    <script src="https://unpkg.com/vue/dist/vue"></script>
-    <script src="https://unpkg.com/element-ui/lib/index"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xe-utils"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vxe-table"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.bootcss.com/qs/6.5.2/qs.min.js"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.7.0/echarts.min.js"></script>
+	<meta charset="utf-8">
+	<title>Element_HTML</title>
+	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	<link rel="stylesheet" href="https://unpkg.com/vxe-table/lib/index.css">
+	<link rel="stylesheet" href="test.css">
+	<script src="https://unpkg.com/vue/dist/vue"></script>
+	<script src="https://unpkg.com/element-ui/lib/index"></script>
+	<script src="https://cdn.jsdelivr.net/npm/xe-utils"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vxe-table"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+	<script src="https://cdn.bootcss.com/qs/6.5.2/qs.min.js"></script>
+	<script src="https://cdn.bootcdn.net/ajax/libs/echarts/4.7.0/echarts.min.js"></script>
 </head>
 <body onload="scrollTo(0, 10)">
-<!--表格数据-->
-<div id="singleStockTable" class="el-main">
-    <!--查询条-->
-    <vxe-form :data="formData" @submit="showStockHistory">
-        <vxe-form-item title="股票类型" field="stockType">
-            <vxe-select v-model="formData.stockType">
-                <vxe-option value="0" label="沪市"></vxe-option>
-                <vxe-option value="1" label="深市"></vxe-option>
-            </vxe-select>
-        </vxe-form-item>
-        <vxe-form-item title="起始代码" field="startCode">
-            <vxe-input v-model="formData.startCode" placeholder="请输入起始股票代码"></vxe-input>
-        </vxe-form-item>
-        <vxe-form-item title="结束代码" field="endCode">
-            <vxe-input v-model="formData.endCode" placeholder="请输入结束股票代码"></vxe-input>
-        </vxe-form-item>
-        <vxe-form-item title="开始日期" field="startDate">
-            <vxe-input v-model="formData.startDate" placeholder="日期类型" type="date"></vxe-input>
-        </vxe-form-item>
-        <vxe-form-item title="结束日期" field="endDate">
-            <vxe-input v-model="formData.endDate" placeholder="日期类型" type="date"></vxe-input>
-        </vxe-form-item>
-        <br>
-        <!--如果当前指定上市日期无数据，则不选中改股票-->
-        <vxe-form-item title="上市日期" field="endDate">
-            <vxe-input v-model="formData.upDate" placeholder="日期类型" type="date"></vxe-input>
-        </vxe-form-item>
-        <!--记录超过最低价对应百分比数的点-->
-        <vxe-form-item title="过滤比例" field="filterPercent">
-            <vxe-select v-model="formData.filterPercent">
-                <vxe-option value="5" label="超最低价5%"></vxe-option>
-                <vxe-option value="10" label="超最低价10%"></vxe-option>
-                <vxe-option value="15" label="超最低价15%"></vxe-option>
-                <vxe-option value="20" label="超最低价20%"></vxe-option>
-                <vxe-option value="25" label="超最低价25%"></vxe-option>
-                <vxe-option value="30" label="超最低价30%"></vxe-option>
-                <vxe-option value="35" label="超最低价35%"></vxe-option>
-                <vxe-option value="40" label="超最低价40%"></vxe-option>
-            </vxe-select>
-        </vxe-form-item>
-        <!--相对记录点的上涨幅度-->
-        <vxe-form-item title="相对涨幅" field="increaseAmount">
-            <vxe-select v-model="formData.increaseAmount">
-                <vxe-option value="5" label="涨幅5%"></vxe-option>
-                <vxe-option value="10" label="超最低价10%"></vxe-option>
-                <vxe-option value="15" label="超最低价15%"></vxe-option>
-                <vxe-option value="20" label="超最低价20%"></vxe-option>
-                <vxe-option value="25" label="超最低价25%"></vxe-option>
-                <vxe-option value="30" label="超最低价30%"></vxe-option>
-                <vxe-option value="35" label="超最低价35%"></vxe-option>
-                <vxe-option value="40" label="超最低价40%"></vxe-option>
-            </vxe-select>
-        </vxe-form-item>
-        <!--指定涨幅所需天数-->
-        <vxe-form-item title="所需天数" field="increaseCost">
-            <vxe-select v-model="formData.increaseCost">
-                <vxe-option value="2" label="2天"></vxe-option>
-                <vxe-option value="3" label="3天"></vxe-option>
-                <vxe-option value="4" label="4天"></vxe-option>
-                <vxe-option value="5" label="5天"></vxe-option>
-                <vxe-option value="6" label="6天"></vxe-option>
-                <vxe-option value="7" label="7天"></vxe-option>
-                <vxe-option value="8" label="8天"></vxe-option>
-                <vxe-option value="9" label="9天"></vxe-option>
-                <vxe-option value="10" label="10天"></vxe-option>
-                <vxe-option value="11" label="11天"></vxe-option>
-                <vxe-option value="12" label="12天"></vxe-option>
-                <vxe-option value="13" label="13天"></vxe-option>
-                <vxe-option value="14" label="14天"></vxe-option>
-                <vxe-option value="15" label="15天"></vxe-option>
-            </vxe-select>
-        </vxe-form-item>
-        <vxe-form-item>
-            <vxe-button type="submit" status="primary">查询</vxe-button>
-            <vxe-button type="reset">重置</vxe-button>
-            <vxe-button status="success" v-on:click="showDetailTable">隐藏/展示详细数据</vxe-button>
-        </vxe-form-item>
-    </vxe-form>
-    <!--详细数据表格-->
-    <vxe-table
-            :seq-config="{startIndex: 0}"
-            border
-            resizable
-            show-overflow
-            show-header-overflow
-            highlight-hover-row
-            highlight-current-row
-            export-config
-            ref="xTable"
-            height="300"
-            :loading="loading"
-            :sort-config="{trigger: 'cell'}"
-            :checkbox-config="{checkField: 'checked'}"
-            v-show="see">
-        <!-- 日期,股票代码,名称,收盘价,最高价,最低价,开盘价,前收盘,涨跌额,涨跌幅,换手率,成交量,成交金额,总市值,流通市值,成交笔数 -->
-        <vxe-table-column type="checkbox" width="40" fixed="left"></vxe-table-column>
-        <vxe-table-column type="seq" title="#" width="80" fixed="left"></vxe-table-column>
-        <vxe-table-column field="date" title="日期" width="100" fixed="left" sortable></vxe-table-column>
-        <vxe-table-column field="stockCode" title="股票代码" width="100" sortable></vxe-table-column>
-        <vxe-table-column field="name" title="名称" width="120" sortable></vxe-table-column>
-        <vxe-table-column field="closePrice" title="收盘价" width="90" sortable></vxe-table-column>
-        <vxe-table-column field="topPrice" title="最高价" width="90" sortable></vxe-table-column>
-        <vxe-table-column field="bottomPrice" title="最低价" width="90" sortable></vxe-table-column>
-        <vxe-table-column field="openPrice" title="开盘价" width="90" sortable></vxe-table-column>
-        <vxe-table-column field="beforeClosing" title="前收盘" width="90" sortable></vxe-table-column>
-        <vxe-table-column field="changeAmount" title="涨跌额" width="90" sortable></vxe-table-column>
-        <vxe-table-column field="change" title="涨跌幅" width="90" sortable></vxe-table-column>
-        <vxe-table-column field="turnoverRate" title="换手率" width="100" sortable></vxe-table-column>
-        <vxe-table-column field="tradeCount" title="成交量" width="120" sortable></vxe-table-column>
-        <vxe-table-column field="tradeAmount" title="成交金额" width="140" sortable></vxe-table-column>
-        <vxe-table-column field="totalValue" title="总市值" width="140" sortable></vxe-table-column>
-        <vxe-table-column field="tradeMarketValue" title="流通市值" width="140" sortable></vxe-table-column>
-        <vxe-table-column field="dealCount" title="成交笔数" width="100" sortable></vxe-table-column>
-    </vxe-table>
-    <!--选择结果表格-->
-    <!--结果数据：达标次数，达标平均周期，达标最长周期，达标最短周期-->
-    <vxe-table
-            border
-            show-header-overflow
-            show-overflow
-            highlight-hover-row
-            :data="resultTableData">
-        <vxe-table-column type="seq" title="序号" width="60"></vxe-table-column>
-        <vxe-table-column field="stockCode" title="股票代码"></vxe-table-column>
-        <vxe-table-column field="name" title="名称"></vxe-table-column>
-        <vxe-table-column field="goalCount" title="达标次数"></vxe-table-column>
-        <vxe-table-column field="goalAveragePeriod" title="达标平均周期"></vxe-table-column>
-        <vxe-table-column field="goalMaxPeriod" title="达标最长周期"></vxe-table-column>
-        <vxe-table-column field="goalMinPeriod" title="达标最短周期"></vxe-table-column>
-    </vxe-table>
+	<!--表格数据-->
+	<div id="singleStockTable" class="el-main">
+		<!--查询条-->
+		<vxe-form :data="formData" @submit="filterAndShowStock">
+			<vxe-form-item title="股票类型" field="stockType">
+				<vxe-select v-model="formData.stockType">
+					<vxe-option value="0" label="沪市"></vxe-option>
+					<vxe-option value="1" label="深市"></vxe-option>
+				</vxe-select>
+			</vxe-form-item>
+			<vxe-form-item title="起始代码" field="startCode">
+				<vxe-input v-model="formData.startCode" placeholder="请输入起始股票代码"></vxe-input>
+			</vxe-form-item>
+			<vxe-form-item title="结束代码" field="endCode">
+				<vxe-input v-model="formData.endCode" placeholder="请输入结束股票代码"></vxe-input>
+			</vxe-form-item>
+			<vxe-form-item title="开始日期" field="startDate">
+				<vxe-input v-model="formData.startDate" placeholder="日期类型" type="date"></vxe-input>
+			</vxe-form-item>
+			<vxe-form-item title="结束日期" field="endDate">
+				<vxe-input v-model="formData.endDate" placeholder="日期类型" type="date"></vxe-input>
+			</vxe-form-item>
+			<br>
+			<!--如果当前指定上市日期无数据，则不选中改股票-->
+			<vxe-form-item title="上市日期" field="endDate">
+				<vxe-input v-model="formData.upDate" placeholder="日期类型" type="date"></vxe-input>
+			</vxe-form-item>
+			<!--记录超过最低价对应百分比数的点-->
+			<vxe-form-item title="过滤比例" field="filterPercent">
+				<vxe-select v-model="formData.filterPercent">
+					<vxe-option value="5" label="超最低价5%"></vxe-option>
+					<vxe-option value="10" label="超最低价10%"></vxe-option>
+					<vxe-option value="15" label="超最低价15%"></vxe-option>
+					<vxe-option value="20" label="超最低价20%"></vxe-option>
+					<vxe-option value="25" label="超最低价25%"></vxe-option>
+					<vxe-option value="30" label="超最低价30%"></vxe-option>
+					<vxe-option value="35" label="超最低价35%"></vxe-option>
+					<vxe-option value="40" label="超最低价40%"></vxe-option>
+				</vxe-select>
+			</vxe-form-item>
+			<!--相对记录点的上涨幅度-->
+			<vxe-form-item title="相对涨幅" field="increaseAmount">
+				<vxe-select v-model="formData.increaseAmount">
+					<vxe-option value="5" label="涨幅5%"></vxe-option>
+					<vxe-option value="10" label="超最低价10%"></vxe-option>
+					<vxe-option value="15" label="超最低价15%"></vxe-option>
+					<vxe-option value="20" label="超最低价20%"></vxe-option>
+					<vxe-option value="25" label="超最低价25%"></vxe-option>
+					<vxe-option value="30" label="超最低价30%"></vxe-option>
+					<vxe-option value="35" label="超最低价35%"></vxe-option>
+					<vxe-option value="40" label="超最低价40%"></vxe-option>
+				</vxe-select>
+			</vxe-form-item>
+			<!--指定涨幅所需天数-->
+			<vxe-form-item title="所需天数" field="increaseCost">
+				<vxe-select v-model="formData.increaseCost">
+					<vxe-option value="2" label="2天"></vxe-option>
+					<vxe-option value="3" label="3天"></vxe-option>
+					<vxe-option value="4" label="4天"></vxe-option>
+					<vxe-option value="5" label="5天"></vxe-option>
+					<vxe-option value="6" label="6天"></vxe-option>
+					<vxe-option value="7" label="7天"></vxe-option>
+					<vxe-option value="8" label="8天"></vxe-option>
+					<vxe-option value="9" label="9天"></vxe-option>
+					<vxe-option value="10" label="10天"></vxe-option>
+					<vxe-option value="11" label="11天"></vxe-option>
+					<vxe-option value="12" label="12天"></vxe-option>
+					<vxe-option value="13" label="13天"></vxe-option>
+					<vxe-option value="14" label="14天"></vxe-option>
+					<vxe-option value="15" label="15天"></vxe-option>
+				</vxe-select>
+			</vxe-form-item>
+			<vxe-form-item>
+				<vxe-button type="submit" status="primary">查询</vxe-button>
+				<vxe-button type="reset">重置</vxe-button>
+				<vxe-button status="success" v-on:click="showDetailTable">隐藏/展示详细数据</vxe-button>
+			</vxe-form-item>
+		</vxe-form>
+		<!--详细数据表格-->
+		<vxe-table
+		:seq-config="{startIndex: 0}"
+		border
+		resizable
+		show-overflow
+		show-header-overflow
+		highlight-hover-row
+		highlight-current-row
+		export-config
+		ref="xTable"
+		height="300"
+		:loading="loading"
+		:sort-config="{trigger: 'cell'}"
+		:checkbox-config="{checkField: 'checked'}"
+		v-show="see">
+		<!-- 日期,股票代码,名称,收盘价,最高价,最低价,开盘价,前收盘,涨跌额,涨跌幅,换手率,成交量,成交金额,总市值,流通市值,成交笔数 -->
+		<vxe-table-column type="checkbox" width="40" fixed="left"></vxe-table-column>
+		<vxe-table-column type="seq" title="#" width="80" fixed="left"></vxe-table-column>
+		<vxe-table-column field="date" title="日期" width="100" fixed="left" sortable></vxe-table-column>
+		<vxe-table-column field="stockCode" title="股票代码" width="100" sortable></vxe-table-column>
+		<vxe-table-column field="name" title="名称" width="120" sortable></vxe-table-column>
+		<vxe-table-column field="closePrice" title="收盘价" width="90" sortable></vxe-table-column>
+		<vxe-table-column field="topPrice" title="最高价" width="90" sortable></vxe-table-column>
+		<vxe-table-column field="bottomPrice" title="最低价" width="90" sortable></vxe-table-column>
+		<vxe-table-column field="openPrice" title="开盘价" width="90" sortable></vxe-table-column>
+		<vxe-table-column field="beforeClosing" title="前收盘" width="90" sortable></vxe-table-column>
+		<vxe-table-column field="changeAmount" title="涨跌额" width="90" sortable></vxe-table-column>
+		<vxe-table-column field="change" title="涨跌幅" width="90" sortable></vxe-table-column>
+		<vxe-table-column field="turnoverRate" title="换手率" width="100" sortable></vxe-table-column>
+		<vxe-table-column field="tradeCount" title="成交量" width="120" sortable></vxe-table-column>
+		<vxe-table-column field="tradeAmount" title="成交金额" width="140" sortable></vxe-table-column>
+		<vxe-table-column field="totalValue" title="总市值" width="140" sortable></vxe-table-column>
+		<vxe-table-column field="tradeMarketValue" title="流通市值" width="140" sortable></vxe-table-column>
+		<vxe-table-column field="dealCount" title="成交笔数" width="100" sortable></vxe-table-column>
+	</vxe-table>
+	<!--选择结果表格-->
+	<!--结果数据：达标次数，达标平均周期，达标最长周期，达标最短周期-->
+	<vxe-table
+	border
+	show-header-overflow
+	show-overflow
+	highlight-hover-row
+	:data="resultTableData">
+	<vxe-table-column type="seq" title="序号" width="60"></vxe-table-column>
+	<vxe-table-column field="stockCode" title="股票代码"></vxe-table-column>
+	<vxe-table-column field="name" title="名称"></vxe-table-column>
+	<vxe-table-column field="goalCount" title="达标次数"></vxe-table-column>
+	<vxe-table-column field="goalAveragePeriod" title="达标平均周期"></vxe-table-column>
+	<vxe-table-column field="goalMaxPeriod" title="达标最长周期"></vxe-table-column>
+	<vxe-table-column field="goalMinPeriod" title="达标最短周期"></vxe-table-column>
+</vxe-table>
 </div>
 <!--个股-->
 <div id="singleStockChart" class="el-main" style="width: auto;height:500px;" ref="singleStockChart">
@@ -156,10 +156,10 @@
 <script type="text/javascript">
     //// 单股图表
     let singleStockChart = new Vue({
-        el: '#singleStockChart',
-        data: {},
-        methods: {
-            getDemoChart: function (ref, stockData, title) {
+    	el: '#singleStockChart',
+    	data: {},
+    	methods: {
+    		getDemoChart: function (ref, stockData, title) {
                 //// 基于准备好的dom，初始化echarts实例
                 let myChart = echarts.init(ref)
                 //// 指定图表的配置项和数据
@@ -167,86 +167,86 @@
                 let xAxisData = []
                 let seriesData = []
                 for (let key in stockData) {
-                    if (key == 'undefined') {
-                        continue
-                    }
-                    legendArr.push(key)
-                    let loSeresData = []
-                    for (let i = 0; i < stockData[key].length; i++) {
-                        if (stockData[key][i]['closePrice'] == 0.0) {
-                            loSeresData.push(loSeresData[i - 1])
-                        } else {
-                            loSeresData.push(stockData[key][i]['closePrice'])
-                        }
-                        if (xAxisData.length < stockData[key].length) {
-                            xAxisData.push(stockData[key][i]['date'])
-                        }
-                    }
-                    let tmp = {
-                        name: key,
-                        type: 'line',
-                        smooth: true,
-                        data: loSeresData.reverse(),
-                        markPoint: {
+                	if (key == 'undefined') {
+                		continue
+                	}
+                	legendArr.push(key)
+                	let loSeresData = []
+                	for (let i = 0; i < stockData[key].length; i++) {
+                		if (stockData[key][i]['closePrice'] == 0.0) {
+                			loSeresData.push(loSeresData[i - 1])
+                		} else {
+                			loSeresData.push(stockData[key][i]['closePrice'])
+                		}
+                		if (xAxisData.length < stockData[key].length) {
+                			xAxisData.push(stockData[key][i]['date'])
+                		}
+                	}
+                	let tmp = {
+                		name: key,
+                		type: 'line',
+                		smooth: true,
+                		data: loSeresData.reverse(),
+                		markPoint: {
                             symbol: "pin", //标注类型
                             symbolSize: 30, //标记大小
                             data: [
-                                {type: "max", name: "最大值"},
-                                {type: "min", name: "最小值"}
+                            {type: "max", name: "最大值"},
+                            {type: "min", name: "最小值"}
                             ]
                         }
                     }
                     seriesData.push(tmp)
                 }
                 const option = {
-                    tooltip: {
+                	tooltip: {
                         //// 当trigger为’item’时只会显示该点的数据，为’axis’时显示该列下所有坐标轴所对应的数据。
                         trigger: 'axis',
                         //// 提示框的位置
                         position: function (pt) {
-                            return [pt[0], '10%']
+                        	return [pt[0], '10%']
                         }
                     },
                     legend: {
-                        data: legendArr
+                    	data: legendArr
                     },
                     title: {
-                        text: title
+                    	text: title
                     },
                     toolbox: {
                         //// feature 各工具配置项: dataZoom 数据区域缩放;restore 配置项还原;saveAsImage下载为图片;magicType动态类型切换
                         feature: {
-                            dataZoom: {
+                        	dataZoom: {
                                 //// y轴不缩放，Index默认为0
                                 yAxisIndex: 'none'
                             },
                             restore: {},
                             saveAsImage: {},
                             magicType: {
-                                type: ['bar', 'line']
+                            	type: ['bar', 'line']
                             }
                         }
                     },
                     xAxis: {
-                        type: 'category',
-                        data: xAxisData.reverse()
+                    	type: 'category',
+                    	data: xAxisData.reverse()
                     },
                     yAxis: {
-                        type: 'value'
+                    	type: 'value'
                     },
                     series: seriesData,
                     //// 内置于坐标系中，使用户可以在坐标系上通过鼠标拖拽、鼠标滚轮、手指滑动（触屏上）来缩放或漫游坐标系
                     dataZoom: [{
-                        type: 'inside',
-                        start: 0,
-                        end: 100
+                    	type: 'inside',
+                    	start: 0,
+                    	end: 100
                     }, {
-                        start: 0,
+                    	start: 0,
                         end: 100,                  // handleIcon 手柄的 icon 形状，支持路径字符串
                         handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
                         handleSize: '80%',        //  控制手柄的尺寸，可以是像素大小，也可以是相对于 dataZoom 组件宽度的百分比，默认跟 dataZoom 宽度相同。
                         handleStyle: {
-                            color: 'pink',
+                        	color: 'pink',
                             shadowBlur: 3,      // shadowBlur图片阴影模糊值，shadowColor阴影的颜色
                             shadowColor: 'red',
                             shadowOffsetX: 2,
@@ -255,10 +255,10 @@
                     }],
                     //// 表格起始位置
                     grid: {
-                        show: true,
-                        x: 40,
-                        x2: 110,
-                        y: 50
+                    	show: true,
+                    	x: 40,
+                    	x2: 110,
+                    	y: 50
                     },
                 }
                 //// 使用刚指定的配置项和数据显示图表。
@@ -269,125 +269,163 @@
     })
     //// 历史数据表格
     let singleStockTable = new Vue({
-        el: "#singleStockTable",
-        data: {
-            loading: false,
-            formData: {},
-            see: false,
-            stockTableData: [],
-            resultTableData: []
-        },
-        created: function () {
-            this.formData = {
-                stockType: '1',
-                startCode: '000001',
-                endCode: '000010',
-                startDate: '2019-01-01',
-                endDate: this.formatDate(new Date(), 'yyyy-MM-dd')
-            }
-        },
-        methods: {
-            getStockHistory: function (formData) {
-                return new Promise(function (resolve) {
-                    axios({
-                        method: 'get',
-                        url: singleStockTable.jointUrl('http://quotes.money.163.com/service/chddata.html', formData),
+    	el: "#singleStockTable",
+    	data: {
+    		loading: false,
+    		formData: {},
+    		see: false,
+    		stockTableData: [],
+    		resultTableData: []
+    	},
+    	created: function () {
+    		this.formData = {
+    			stockType: '1',
+    			startCode: '000001',
+    			endCode: '000010',
+    			startDate: '2019-01-01',
+    			endDate: this.formatDate(new Date(), 'yyyy-MM-dd'),
+    			upDate: '1992-01-01',
+    			filterPercent: '10',
+    			increaseAmount: '15',
+    			increaseCost: '7'
+    		}
+    	},
+    	methods: {
+    		getStockHistory: function (formData) {
+    			return new Promise(function (resolve) {
+    				axios({
+    					method: 'get',
+    					url: singleStockTable.jointUrl('http://quotes.money.163.com/service/chddata.html', formData),
                         responseType: 'arraybuffer'// 或者 blob
                     }).then(response => {
-                        const blob = new Blob([response.data])
-                        const reader = new FileReader()
-                        reader.onload = function () {
-                            resolve(this.result)
-                        }
-                        reader.readAsText(blob, 'gbk')
+                    	const blob = new Blob([response.data])
+                    	const reader = new FileReader()
+                    	reader.onload = function () {
+                    		resolve(this.result)
+                    	}
+                    	reader.readAsText(blob, 'gbk')
                     }).catch(error => {
-                        console.log(error)
+                    	console.log(error)
                     })
                 })
-            },
-            showDetailTable: function () {
-                singleStockTable.see = singleStockTable.see == true ? false : true;
+    		},
+    		showDetailTable: function () {
+    			singleStockTable.see = singleStockTable.see == true ? false : true;
                 //// 装载数据
                 singleStockTable.loading = true
                 const xTable = singleStockTable.$refs.xTable
                 if (xTable) {
-                    singleStockTable.$refs.xTable.reloadData(singleStockTable.stockTableData).then(() => {
-                        singleStockTable.loading = false
-                    })
+                	singleStockTable.$refs.xTable.reloadData(singleStockTable.stockTableData).then(() => {
+                		singleStockTable.loading = false
+                	})
                 }
             },
-            showStockHistory: function () {
-                let stockChartData = {}
-                singleStockTable.stockTableData.length = 0
-                let count = 0
-                for (let i = new Number(singleStockTable.formData['startCode']); i <= new Number(singleStockTable.formData['endCode']); i++) {
-                    let loCode = '00000' + i;
-                    loCode = loCode.substring(loCode.length - 6, loCode.length)
-                    let loFormData = {
-                        stockType: singleStockTable.formData['stockType'],
-                        code: loCode,
-                        startDate: singleStockTable.formData['startDate'],
-                        endDate: singleStockTable.formData['endDate']
-                    }
-                    singleStockTable.getStockHistory(loFormData).then(result => {
-                        count++
-                        let loStockName
-                        let loStockData = []
-                        let stockResultArr = result.split('\n')
-                        for (let i = 1; i < stockResultArr.length - 1; i++) {
-                            let dataArr = stockResultArr[i].split(',')
-                            if (i == 1) {
-                                loStockName = dataArr[2] + '(' + dataArr[1].substring(1, 7) + ')'
-                            }
-                            let tmp = {
-                                date: dataArr[0],
-                                stockCode: dataArr[1].substring(1, 7),
-                                name: dataArr[2],
-                                closePrice: dataArr[3],
-                                topPrice: dataArr[4],
-                                bottomPrice: dataArr[5],
-                                openPrice: dataArr[6],
-                                beforeClosing: dataArr[7],
-                                changeAmount: dataArr[8],
-                                change: dataArr[9],
-                                turnoverRate: dataArr[10],
-                                tradeCount: dataArr[11],
-                                tradeAmount: dataArr[12],
-                                totalValue: new Number(dataArr[13]),
-                                tradeMarketValue: new Number(dataArr[14]),
-                                dealCount: dataArr[15]
-                            }
-                            if (loStockName != undefined && loStockName.indexOf('*ST') == -1) {
-                                loStockData.push(tmp)
-                                singleStockTable.stockTableData.push(tmp)
-                            }
-                        }
-                        if (loStockName != undefined && loStockName.indexOf('*ST') == -1) {
-                            stockChartData[loStockName] = loStockData
-                        }
-                        if (count == new Number(singleStockTable.formData['endCode']) - new Number(singleStockTable.formData['startCode']) + 1) {
+            filterAndShowStock: function () {
+            	let passUpDateFilterResult = []
+            	let count = 0
+            	for (let i = new Number(singleStockTable.formData['startCode']); i <= new Number(singleStockTable.formData['endCode']); i++) {
+            		let loCode = '00000' + i;
+            		loCode = loCode.substring(loCode.length - 6, loCode.length)
+            		let loUpDate = singleStockTable.parseDate(singleStockTable.formData['upDate'])
+            		loUpDate.setDate((loUpDate.getDate()-7))
+            		let loFormData = {
+            			stockType: singleStockTable.formData['stockType'],
+            			code: loCode,
+            			startDate: singleStockTable.formatDate(loUpDate, 'yyyy-MM-dd'),
+            			endDate: singleStockTable.formData['upDate']
+            		}
+            		singleStockTable.getStockHistory(loFormData).then(result => {
+            			count++
+            			let stockResultArr = result.split('\n')
+            			if (stockResultArr.length > 2) {
+            				passUpDateFilterResult.push(loCode)
+            			}
+            			if (count == new Number(singleStockTable.formData['endCode']) - new Number(singleStockTable.formData['startCode']) + 1) {
+            				singleStockTable.showStockHistory(passUpDateFilterResult)
+            			}
+            		})
+            	}
+            },
+            showStockHistory: function (codeArr) {
+            	let stockChartData = {}
+            	singleStockTable.stockTableData.length = 0
+            	let count = 0
+            	let loCodeArr = []
+            	if (codeArr != null && codeArr.length > 0) {
+            		loCodeArr = codeArr
+            	} else {
+            		for (let i = new Number(singleStockTable.formData['startCode']); i <= new Number(singleStockTable.formData['endCode']); i++) {
+            			let loCode = '00000' + i;
+            			loCode = loCode.substring(loCode.length - 6, loCode.length)
+            			loCodeArr.push(loCode)
+            		}
+            	}
+            	for (let loCode in loCodeArr) {
+            		let loFormData = {
+            			stockType: singleStockTable.formData['stockType'],
+            			code: loCodeArr[loCode],
+            			startDate: singleStockTable.formData['startDate'],
+            			endDate: singleStockTable.formData['endDate']
+            		}
+            		singleStockTable.getStockHistory(loFormData).then(result => {
+            			count++
+            			let loStockName
+            			let loStockData = []
+            			let stockResultArr = result.split('\n')
+            			for (let i = 1; i < stockResultArr.length - 1; i++) {
+            				let dataArr = stockResultArr[i].split(',')
+            				if (i == 1) {
+            					loStockName = dataArr[2] + '(' + dataArr[1].substring(1, 7) + ')'
+            				}
+            				let tmp = {
+            					date: dataArr[0],
+            					stockCode: dataArr[1].substring(1, 7),
+            					name: dataArr[2],
+            					closePrice: dataArr[3],
+            					topPrice: dataArr[4],
+            					bottomPrice: dataArr[5],
+            					openPrice: dataArr[6],
+            					beforeClosing: dataArr[7],
+            					changeAmount: dataArr[8],
+            					change: dataArr[9],
+            					turnoverRate: dataArr[10],
+            					tradeCount: dataArr[11],
+            					tradeAmount: dataArr[12],
+            					totalValue: new Number(dataArr[13]),
+            					tradeMarketValue: new Number(dataArr[14]),
+            					dealCount: dataArr[15]
+            				}
+            				if (loStockName != undefined && loStockName.indexOf('*ST') == -1) {
+            					loStockData.push(tmp)
+            					singleStockTable.stockTableData.push(tmp)
+            				}
+            			}
+            			if (loStockName != undefined && loStockName.indexOf('*ST') == -1) {
+            				stockChartData[loStockName] = loStockData
+            			}
+            			if (count == loCodeArr.length) {
                             //// 装载数据
                             singleStockTable.loading = true
                             const xTable = singleStockTable.$refs.xTable
                             if (xTable) {
-                                singleStockTable.$refs.xTable.reloadData(singleStockTable.stockTableData).then(() => {
-                                    singleStockTable.loading = false
-                                })
+                            	singleStockTable.$refs.xTable.reloadData(singleStockTable.stockTableData).then(() => {
+                            		singleStockTable.loading = false
+                            	})
                             }
                             singleStockChart.getDemoChart(singleStockChart.$refs.singleStockChart, stockChartData, '收盘价')
                         }
                     })
-                }
+            	}
             },
             jointUrl: function (baseUrl, jsonData) {
-                baseUrl += '?'
-                baseUrl += 'code=' + jsonData['stockType'] + jsonData['code'] + '&'
-                baseUrl += 'start=' + jsonData['startDate'].replace(/-/g, "") + '&'
-                baseUrl += 'end=' + jsonData['endDate'].replace(/-/g, "")
-                return baseUrl
+            	baseUrl += '?'
+            	baseUrl += 'code=' + jsonData['stockType'] + jsonData['code'] + '&'
+            	baseUrl += 'start=' + jsonData['startDate'].replace(/-/g, "") + '&'
+            	baseUrl += 'end=' + jsonData['endDate'].replace(/-/g, "")
+            	return baseUrl
             },
             formatDate: function (now, fmt) {
-                let o = {
+            	let o = {
                     "M+": now.getMonth() + 1, //月份
                     "d+": now.getDate(), //日
                     "H+": now.getHours(), //小时
@@ -396,63 +434,78 @@
                     "q+": Math.floor((now.getMonth() + 3) / 3), //季度
                     "S": now.getMilliseconds() //毫秒
                 }
-                if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (now.getFullYear() + "").substr(4 - RegExp.$1.length))
-                for (let k in o)
-                    if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)))
+                if (/(y+)/.test(fmt)) {
+                	fmt = fmt.replace(RegExp.$1, (now.getFullYear() + "").substr(4 - RegExp.$1.length))
+                } 
+                for (let k in o) {
+                	if (new RegExp("(" + k + ")").test(fmt)) {
+                		fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)))
+                	}
+                }
                 return fmt
+            },
+            //// 'yyyy-MM-dd'格式的字符串转日期
+            parseDate: function (dataStr) {
+            	var dateStrs = dataStr.split("-");
+            	var year = parseInt(dateStrs[0], 10)
+            	var month = parseInt(dateStrs[1], 10) - 1
+            	var day = parseInt(dateStrs[2], 10)
+            	var date = new Date(year, month, day)
+            	return date;
             }
         }
     })
+
     //// 沪市图表
     let hsChart = new Vue({
-        el: '#hsChart',
-        data: {},
-        methods: {
-            showHSChart: function () {
-                let loFormData = {
-                    stockType: '0',
-                    code: '000001',
-                    startDate: '2003-01-01',
-                    endDate: singleStockTable.formatDate(new Date(), 'yyyy-MM-dd')
-                }
-                singleStockTable.getStockHistory(loFormData).then(result => {
-                    let stockChartData = {}
-                    let loStockName
-                    let loStockData = []
-                    let stockResultArr = result.split('\n')
-                    for (let i = 1; i < stockResultArr.length - 1; i++) {
-                        let dataArr = stockResultArr[i].split(',')
-                        if (i == 1) {
-                            loStockName = dataArr[2] + '(' + dataArr[1].substring(1, 7) + ')'
-                        }
-                        let tmp = {
-                            date: dataArr[0],
-                            stockCode: dataArr[1].substring(1, 7),
-                            name: dataArr[2],
-                            closePrice: dataArr[3],
-                            topPrice: dataArr[4],
-                            bottomPrice: dataArr[5],
-                            openPrice: dataArr[6],
-                            beforeClosing: dataArr[7],
-                            changeAmount: dataArr[8],
-                            change: dataArr[9],
-                            turnoverRate: dataArr[10],
-                            tradeCount: dataArr[11],
-                            tradeAmount: dataArr[12],
-                            totalValue: new Number(dataArr[13]),
-                            tradeMarketValue: new Number(dataArr[14]),
-                            dealCount: dataArr[15]
-                        }
-                        loStockData.push(tmp)
-                    }
-                    stockChartData[loStockName] = loStockData
-                    singleStockChart.getDemoChart(hsChart.$refs.hsChart, stockChartData, '历史大盘走势')
-                })
-            }
-        }
+    	el: '#hsChart',
+    	data: {},
+    	methods: {
+    		showHSChart: function () {
+    			let loFormData = {
+    				stockType: '0',
+    				code: '000001',
+    				startDate: '2003-01-01',
+    				endDate: singleStockTable.formatDate(new Date(), 'yyyy-MM-dd')
+    			}
+    			singleStockTable.getStockHistory(loFormData).then(result => {
+    				let stockChartData = {}
+    				let loStockName
+    				let loStockData = []
+    				let stockResultArr = result.split('\n')
+    				for (let i = 1; i < stockResultArr.length - 1; i++) {
+    					let dataArr = stockResultArr[i].split(',')
+    					if (i == 1) {
+    						loStockName = dataArr[2] + '(' + dataArr[1].substring(1, 7) + ')'
+    					}
+    					let tmp = {
+    						date: dataArr[0],
+    						stockCode: dataArr[1].substring(1, 7),
+    						name: dataArr[2],
+    						closePrice: dataArr[3],
+    						topPrice: dataArr[4],
+    						bottomPrice: dataArr[5],
+    						openPrice: dataArr[6],
+    						beforeClosing: dataArr[7],
+    						changeAmount: dataArr[8],
+    						change: dataArr[9],
+    						turnoverRate: dataArr[10],
+    						tradeCount: dataArr[11],
+    						tradeAmount: dataArr[12],
+    						totalValue: new Number(dataArr[13]),
+    						tradeMarketValue: new Number(dataArr[14]),
+    						dealCount: dataArr[15]
+    					}
+    					loStockData.push(tmp)
+    				}
+    				stockChartData[loStockName] = loStockData
+    				singleStockChart.getDemoChart(hsChart.$refs.hsChart, stockChartData, '历史大盘走势')
+    			})
+    		}
+    	}
     })
     //// 数据加载
     hsChart.showHSChart()
-    singleStockTable.showStockHistory()
+    singleStockTable.filterAndShowStock()
 </script>
 </html>
