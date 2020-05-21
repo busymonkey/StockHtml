@@ -338,7 +338,7 @@
                             fontWeight: 'bold'
                         },
                         position: function (pt) {
-                            return loHorizen ? {right: 0, top: pt[1]} : {top: 0, left: pt[0]-100}
+                            return loHorizen ? {right: 0, top: pt[1]} : {top: 0, left: pt[0]-110}
                         }
                     },
                     xAxis: {
@@ -363,9 +363,6 @@
                         },
                     },
                     series: seriesData,
-                    grid: {
-                        top: 100
-                    }
                 }
                 //// 使用刚指定的配置项和数据显示图表。
                 myChart.clear()
